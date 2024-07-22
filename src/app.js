@@ -9,8 +9,12 @@ import ProductManager from '../archivos.js';
 
 const manager = new ProductManager
 const app = express();
-const httpServer = app.listen(8000, () => {
-    console.log('Listening on port 8000');
+
+const PORT = process.env.PORT || 8000
+
+
+const httpServer = app.listen(PORT, () => {
+    console.log('Listening at port ');
 });
 
 const socketServer = new Server(httpServer)
