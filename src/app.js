@@ -6,8 +6,7 @@ import handlebars from 'express-handlebars';
 import viewsRouter, { setupSocketIO } from './routes/views.router.js';
 import usersRouter from './routes/users.router.js'
 import { Server } from 'socket.io';
-
-import mongoose from 'mongoose';
+import connectDB from './config/index.js';
 
 const app = express();
 const PORT = 8080;
@@ -17,12 +16,8 @@ const httpServer = app.listen(PORT, () => {
     console.log(`Listening at port 8080`);
 });
 
-//coneccion mongo    localhost=127.0.0.1
-//mongoose.connect('mongodb://127.0.0.1:27017/backcoder')
 
-mongoose.connect('mongodb+srv://tomas:nagualpete777@cluster0.qmf3jac.mongodb.net/ecommerce?retryWrites=true&w=majority')
-console.log('base de datos conectada')
-
+connectDB()
 
 // Initialize Socket.IO
 const socketServer = new Server(httpServer);
