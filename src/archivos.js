@@ -2,7 +2,7 @@ import fs from 'fs';
 
 class ProductManager {
     constructor() {
-        this.path = './Products.json';
+        this.path = './src/Products.json';
         this.products = [];
         this.loadProducts();
     }

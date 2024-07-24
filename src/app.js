@@ -24,12 +24,6 @@ mongoose.connect('mongodb+srv://tomas:nagualpete777@cluster0.qmf3jac.mongodb.net
 console.log('base de datos conectada')
 
 
-
-
-
-
-
-
 // Initialize Socket.IO
 const socketServer = new Server(httpServer);
 
@@ -45,12 +39,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
+
 app.engine('hbs', handlebars.engine({
     extname: '.hbs'
 }));
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'hbs');
+
+
 
 // Use routers
 app.use('/', viewsRouter);

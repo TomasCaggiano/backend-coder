@@ -3,7 +3,7 @@
 
     <div>
         <h2>add new product</h2>
-        <form action="addProductForm">
+        <form method="POST" action="addProductForm" enctype="multipart/form-data">
             <input type="text" id="title" placeholder="title" required>
             <input type="number" id="code" placeholder="code" required>
             <input type="number" id="price" placeholder="price" required>
