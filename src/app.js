@@ -1,7 +1,7 @@
 import express from 'express';
 import productsRouter from './routes/products.router.js';
 import cartRouter from './routes/cart.router.js';
-import { __dirname, uploader } from './utils.js';
+import { __dirname, uploader } from './multer.js';
 import handlebars from 'express-handlebars';
 import viewsRouter, { setupSocketIO } from './routes/views.router.js';
 import usersRouter from './routes/users.router.js'

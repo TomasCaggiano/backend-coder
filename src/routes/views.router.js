@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import ProductManager from '../archivos.js';
-import { __dirname } from '../utils.js';
+import { __dirname, uploader } from '../utils/multer.js';
 
 const router = Router();
 const manager = new ProductManager();
@@ -15,7 +15,7 @@ router.get('/', async(req, res) => {
     });
 });
 
-router.get('/realTimeProducts', async(req, res) => {
+router.get('/realTimeProducts', uploader.single('myFile'), async(req, res) => {
     const products = await manager.getProducts();
     res.render('realTimeProducts', {
         products,

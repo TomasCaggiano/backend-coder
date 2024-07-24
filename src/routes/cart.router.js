@@ -1,6 +1,6 @@
 import { Router } from "express";
 import fs from 'fs';
-import { __dirname } from "../utils.js";
+import { __dirname } from "../multer.js";
 import path from 'path'
 
 const router = Router()
