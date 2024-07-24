@@ -1,12 +1,11 @@
 import express from 'express';
-import productsRouter from './routes/products.router.js';
-import cartRouter from './routes/cart.router.js';
+import productsRouter from './dao/mongoDB/routes/products.routerDB.js';
+import cartRouter from './dao/mongoDB/routes/carts.routerDB.js';
 import { __dirname, uploader } from './multer.js';
 import handlebars from 'express-handlebars';
-import viewsRouter, { setupSocketIO } from './routes/views.router.js';
-import usersRouter from './routes/users.router.js'
+import viewsRouter, { setupSocketIO } from './dao/mongoDB/routes/views.router.js';
 import { Server } from 'socket.io';
-import connectDB from './config/index.js';
+import mongoose from 'mongoose';
 
 const app = express();
 const PORT = 8080;
@@ -17,7 +16,8 @@ const httpServer = app.listen(PORT, () => {
 });
 
 
-connectDB()
+mongoose.connect('mongodb+srv://tomas:nagualpete777@cluster0.qmf3jac.mongodb.net/ecommerce?retryWrites=true&w=majority')
+console.log('base de datos conectada')
 
 // Initialize Socket.IO
 const socketServer = new Server(httpServer);
@@ -48,7 +48,7 @@ app.set('view engine', 'hbs');
 app.use('/', viewsRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/carts', cartRouter);
-app.use('/api/users', usersRouter);
+
 
 // Handle file upload
 app.use('/subir-archivo', uploader.single('file'), (req, res) => {

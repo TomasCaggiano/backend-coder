@@ -1,12 +1,14 @@
-<div>
-    <h1>chat</h1>
-    <input type="text" name="message" id="message">
-    <div >
-<ul id="mensajeLogs">
-    
-</ul>
+<div id="chatContainer">
+        <ul id="messagesList">
+            {{#each messages}}
+                <li><strong>{{this.user}}:</strong> {{this.message}}</li>
+            {{/each}}
+        </ul>
+        <form id="chatForm">
+            <input type="text" id="messageInput" placeholder="Enter your message" required>
+            <button type="submit">Send</button>
+        </form>
     </div>
-</div>
-<script src=" https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.all.min.js "></script>
-<script src="/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/chat.js"></script>
 <script src="/js/chat.js"></script>

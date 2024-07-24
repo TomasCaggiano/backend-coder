@@ -1,4 +1,4 @@
-import http from 'http'
+/*import http from 'http'
 
 const server = http.createServer((req, res) => {
     console.log(req.url)
@@ -13,3 +13,4 @@ server.listen(8000, error =>{
     if(error) console.log(error)
         console.log('listening port 8000')
 })
+*/
