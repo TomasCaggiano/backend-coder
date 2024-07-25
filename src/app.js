@@ -1,10 +1,10 @@
 import express from 'express';
-import productsRouter from './routes/products.router.js';
-import cartRouter from './routes/cart.router.js';
+import productsRouter from './routes/products.routerFS.js';
+import cartRouter from './routes/cart.routerFS.js';
 import { __dirname, uploader } from './multer.js';
 import handlebars from 'express-handlebars';
 import viewsRouter, { setupSocketIO } from './routes/views.router.js';
-import usersRouter from './routes/users.router.js'
+import usersRouter from './routes/users.routerDB.js'
 import { Server } from 'socket.io';
 
 import mongoose from 'mongoose';

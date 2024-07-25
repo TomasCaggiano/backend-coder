@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import ProductManager from '../archivos.js';
+import ProductManager from '../dao/fIleSystem/archivos.js';
 import { __dirname, uploader } from '../multer.js';
 
 const router = Router();
