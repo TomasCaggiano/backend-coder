@@ -6,21 +6,10 @@ const router = Router();
 const manager = new ProductManager();
 
 router.get('/', async(req, res) => {
-    const products = await manager.getProducts();
-    res.render('home', {
-        nombre: 'carlitos',
-        username: 'mengueche',
-        products,
-        style: 'home.css'
-    });
-});
+    // const product = await productMangagerMongo.getPRoducts()
+    res.render('index', { products })
+})
 
-router.get('/realTimeProducts', uploader.single('myFile'), async(req, res) => {
-    const products = await manager.getProducts();
-    res.render('realTimeProducts', {
-        products,
-    });
-});
 
 router.get('/chat', (req, res) => {
     res.render('chat', {

@@ -6,6 +6,8 @@ import handlebars from 'express-handlebars';
 import viewsRouter, { setupSocketIO } from './routes/views.router.js';
 import usersRouter from './routes/users.routerDB.js'
 import { Server } from 'socket.io';
+import productsRouterDB from './routes/products.routerDB.js'
+import CartsRouterDB from './routes/cart.routerDB.js'
 
 import mongoose from 'mongoose';
 
@@ -52,7 +54,9 @@ app.set('view engine', 'hbs');
 // Use routers
 app.use('/', viewsRouter);
 app.use('/api/products', productsRouter);
+app.use('/api/productsDB', productsRouterDB);
 app.use('/api/carts', cartRouter);
+app.use('/api/cartsDB', CartsRouterDB);
 app.use('/api/users', usersRouter);
 
 // Handle file upload
