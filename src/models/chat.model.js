@@ -1,18 +1,10 @@
 import mongoose from 'mongoose';
 
-// Definir el esquema para los mensajes del chat
 const chatSchema = new mongoose.Schema({
-    user: {
-        type: String,
-        required: true
-    },
-    message: {
-        type: String,
-        required: true
-    }
-}, { timestamps: true }); // Incluye timestamps para cada mensaje
+    user: { type: String, required: true },
+    message: { type: String, required: true },
+}, { timestamps: true });
 
-// Crear el modelo basado en el esquema
-const ChatModel = mongoose.model('messages', chatSchema);
+const Chat = mongoose.model('messages', chatSchema);
 
-export { ChatModel };
+export default Chat;

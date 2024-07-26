@@ -1,14 +1,22 @@
-import { ChatModel } from '../../models/chat.model.js';
+import Chat from '../../models/chat.model.js';
 
 class ChatManager {
-    // Obtener todos los mensajes
-    async getMessages() {
-        return await ChatModel.find().exec();
+    async addMessage(user, message) {
+        try {
+            const newMessage = new Chat({ user, message });
+            await newMessage.save();
+        } catch (error) {
+            console.error('Error adding message:', error);
+        }
     }
 
-    // Agregar un nuevo mensaje
-    async addMessage(user, message) {
-        return await ChatModel.create({ user, message });
+    async getMessages() {
+        try {
+            return await Chat.find({});
+        } catch (error) {
+            console.error('Error retrieving messages:', error);
+            return [];
+        }
     }
 }
 
