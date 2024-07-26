@@ -1,46 +1,48 @@
-class ProductManager{
-    constructor () {
-        this.products =[];
-};
+class ProductManager {
+    constructor() {
+        this.products = [];
+    };
 
- getProducts(){
-    return this.products;
- }
-
- addProduct(productData){
-    const product =
-    {id : this.idIncrementable(),
-    title: productData.title,
-    price: productData.price,
-    thumbnail: productData.thumbnail,
-    code : productData.code,
-    stock: productData.stock};
- this.products.push(product);}
-
- idIncrementable(){
-     if (this.products.legth === 0){
-         return 1
-     }
-     const highestId = this.products.reduce((maxId, product) => Math.max(maxId, product.id), 0);
-     return highestId+1;
- }
-
-
- getProductById(idProduct){
-    const product = this.products.find((product) => product.id === idProduct);
-    if(!product){
-        throw new error('not found product');
-    }else{return `the product is ${product.title}`}
- }
-
- deleteProduct(idProduct){
-    const index = this.products.findIndex((product) => product.id === idProduct);
-    if (index === -1) {
-        throw new error('product not found')
+    getProducts() {
+        return this.products;
     }
-    this.products.splice(index, 1);
-    return `product with id ${idProduct} has been deleted`
- }
+
+    addProduct(productData) {
+        const product = {
+            id: this.idIncrementable(),
+            title: productData.title,
+            price: productData.price,
+            thumbnail: productData.thumbnail,
+            code: productData.code,
+            stock: productData.stock
+        };
+        this.products.push(product);
+    }
+
+    idIncrementable() {
+        if (this.products.legth === 0) {
+            return 1
+        }
+        const highestId = this.products.reduce((maxId, product) => Math.max(maxId, product.id), 0);
+        return highestId + 1;
+    }
+
+
+    getProductById(idProduct) {
+        const product = this.products.find((product) => product.id === idProduct);
+        if (!product) {
+            throw new error('not found product');
+        } else { return `the product is ${product.title}` }
+    }
+
+    deleteProduct(idProduct) {
+        const index = this.products.findIndex((product) => product.id === idProduct);
+        if (index === -1) {
+            throw new error('product not found')
+        }
+        this.products.splice(index, 1);
+        return `product with id ${idProduct} has been deleted`
+    }
 }
 
 
@@ -91,30 +93,27 @@ try {
 
 
 try {
-    const product = manager.getProductById(3);  
+    const product = manager.getProductById(3);
     console.log("Producto encontrado:", product);
 } catch (error) {
     console.error(error.message);
 }
 
-    try{
-        const deleted = manager.deleteProduct(2);
-        console.log('producto eliminado:', deleted)
-    }catch(error){
-        console.log(error.message)
-    }
+try {
+    const deleted = manager.deleteProduct(2);
+    console.log('producto eliminado:', deleted)
+} catch (error) {
+    console.log(error.message)
+}
 
 const product6 = {
-        title: "Producto 6",
-        price: 100,
-        thumbnail: "/imagen6.jpg",
-        code: "P006",
-        stock: 10
-    };
+    title: "Producto 6",
+    price: 100,
+    thumbnail: "/imagen6.jpg",
+    code: "P006",
+    stock: 10
+};
 
-    manager.addProduct(product6);
+manager.addProduct(product6);
 
-    console.log("Productos después de eliminar:", manager.getProducts());
-
-    
-    
+console.log("Productos después de eliminar:", manager.getProducts());

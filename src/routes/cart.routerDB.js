@@ -1,23 +1,34 @@
-import { Router } from 'express'
-import CartsManagerDB from '../dao/mognoDB/cartManagerDB.js'
-
-
-const router = Router()
-const cartService = new CartsManagerDB()
+import { Router } from 'express';
+import CartsManagerDB from '../dao/mognoDB/cartManagerDB.js';
+const router = Router();
+const cartService = new CartsManagerDB();
 
 router.get('/', async(req, res) => {
-    const carts = await cartService.getCarts()
-    res.send(carts)
-})
+    try {
+        const carts = await cartService.getCarts();
+        res.send(carts);
+    } catch (error) {
+        res.status(500).send({ status: 'error', error: error.message });
+    }
+});
+
 router.post('/', async(req, res) => {
-    const carts = await cartService.createCart()
-    res.send(carts)
-})
+    try {
+        const cart = await cartService.createCart();
+        res.status(201).send(cart);
+    } catch (error) {
+        res.status(500).send({ status: 'error', error: error.message });
+    }
+});
+
 router.post('/:cid/products/:pid', async(req, res) => {
-    const { cid, pid } = req.params
+    const { cid, pid } = req.params;
+    try {
+        const cart = await cartService.addProduct(cid, pid);
+        res.send(cart);
+    } catch (error) {
+        res.status(500).send({ status: 'error', error: error.message });
+    }
+});
 
-    const result = await cartService.addProduct(cid, pid)
-    res.send(result)
-})
-
-export default router
+export default router;

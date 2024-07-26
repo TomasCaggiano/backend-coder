@@ -8,7 +8,6 @@ import usersRouter from './routes/users.routerDB.js'
 import { Server } from 'socket.io';
 import productsRouterDB from './routes/products.routerDB.js'
 import CartsRouterDB from './routes/cart.routerDB.js'
-
 import mongoose from 'mongoose';
 
 const app = express();
@@ -43,8 +42,10 @@ app.use(express.static(__dirname + '/public'));
 
 
 app.engine('hbs', handlebars.engine({
-    extname: '.hbs'
+    extname: '.hbs',
 }));
+
+
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'hbs');
