@@ -1,0 +1,14 @@
+<h1>{{product.title}}</h1>
+    <p>Price: ${{product.price}}</p>
+    <p>Description: {{product.description}}</p>
+    <button onclick="addToCart('{{product._id}}')">Add to Cart</button>
+    <a href="/products">Back to Products</a>
+    <script>
+        function addToCart(productId) {
+            fetch(`/api/carts/${cartId}/products/${productId}`, {
+                method: 'POST'
+            }).then(response => response.json())
+              .then(data => alert('Product added to cart'))
+              .catch(error => console.error('Error:', error));
+        }
+    </script>

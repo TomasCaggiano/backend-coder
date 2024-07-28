@@ -9,6 +9,8 @@ import { Server } from 'socket.io';
 import productsRouterDB from './routes/products.routerDB.js'
 import CartsRouterDB from './routes/cart.routerDB.js'
 import mongoose from 'mongoose';
+import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access';
+
 
 const app = express();
 const PORT = 8080;
@@ -42,6 +44,9 @@ app.use(express.static(__dirname + '/public'));
 
 
 app.engine('hbs', handlebars.engine({
+    helpers: {
+        eq: (a, b) => a === b
+    },
     extname: '.hbs',
 }));
 

@@ -1,3 +1,4 @@
+// ProductManagerDB.js
 import { productsModel } from "../../models/products.models.js";
 import { cartsModel } from "../../models/carts.model.js";
 
@@ -22,8 +23,33 @@ class ProductManagerDB {
         await cart.save();
     }
 
+    async getProductsPaginated({ filter = {}, limit = 10, page = 1, sort = '' } = {}) {
+        const sortOptions = {};
+        if (sort === 'asc') {
+            sortOptions.price = 1;
+        } else if (sort === 'desc') {
+            sortOptions.price = -1;
+        }
+
+        const options = {
+            limit: parseInt(limit, 10),
+            skip: (parseInt(page, 10) - 1) * parseInt(limit, 10),
+            sort: sortOptions
+        };
+
+        return await this.products.find(filter, null, options);
+    }
+
     async getProducts() {
-        return await this.products.find({});
+        return await this.products.find({})
+    }
+
+    async getTotalProductsCount(filter = {}) {
+        return await this.products.countDocuments(filter);
+    }
+
+    async getProductById(pid) {
+        return await this.products.findById(pid);
     }
 
     async createProduct(productData) {

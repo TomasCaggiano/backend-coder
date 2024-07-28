@@ -7,7 +7,7 @@ const productsSchema = new Schema({
         unique: true
     },
     code: {
-        type: String, // Cambiado a String para manejar códigos alfanuméricos
+        type: String,
         required: true,
         unique: true
     },
@@ -25,4 +25,4 @@ const productsSchema = new Schema({
     }
 });
 
-export const productsModel = model('Product', productsSchema);
+export const productsModel = model('products', productsSchema);

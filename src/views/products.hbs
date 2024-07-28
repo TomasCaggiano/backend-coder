@@ -1,0 +1,25 @@
+<h1>Products</h1>
+    <div class="product-list">
+        {{#each products}}
+            <div class="product-item">
+                <img src={{this.thumbnail}} alt="">
+                <h2>{{this.title}}</h2>
+                <p>Price: ${{this.price}}</p>
+                <button onclick="window.location.href='/products/{{this._id}}'">View Details</button>
+                <button onclick="addToCart('{{this._id}}')">Add to Cart</button>
+            </div>
+        {{/each}}
+    </div>
+    <div class="pagination">
+        {{#if (eq currentPage 1)}}
+            <span>Previous</span>
+        {{else}}
+            <a href="?page={{subtract currentPage 1}}&limit=10">Previous</a>
+        {{/if}}
+        <span>Page {{currentPage}} of {{totalPages}}</span>
+        {{#if (eq currentPage totalPages)}}
+            <span>Next</span>
+        {{else}}
+            <a href="?page={{add currentPage 1}}&limit=10">Next</a>
+        {{/if}}
+    </div>

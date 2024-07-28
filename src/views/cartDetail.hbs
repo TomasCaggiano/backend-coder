@@ -1,0 +1,7 @@
+<h1>{{product.title}}</h1>
+    <p>Price: ${{product.price}}</p>
+    <p>Category: {{product.category}}</p>
+    <p>Description: {{product.description}}</p>
+    <img src="{{product.thumbnail}}" alt="{{product.title}}">
+    <button onclick="addToCart('{{product._id}}')">Add to Cart</button>
+    <a href="/products">Back to Products</a>
