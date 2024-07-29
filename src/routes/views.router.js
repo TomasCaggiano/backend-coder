@@ -3,13 +3,21 @@ import ProductManager from '../dao/mognoDB/productsManagerDB.js';
 import CartManager from '../dao/mognoDB/cartManagerDB.js';
 import ChatManager from '../dao/mognoDB/chatManager.js';
 import { uploader } from '../multer.js';
-
+import auth from '../middlewares/auth.middleware.js'
 const router = Router();
 const productManager = new ProductManager();
 const cartManager = new CartManager();
 const chatManager = new ChatManager();
 
-// Ruta para la página principal
+
+router.get('/login', (req, res) => {
+    res.render('login')
+})
+router.get('/register', (req, res) => {
+    res.render('register')
+})
+
+
 router.get('/', async(req, res) => {
     try {
         const products = await productManager.getProductsPaginated();
@@ -44,7 +52,7 @@ router.get('/chat', (req, res) => {
 });
 
 // Ruta para visualizar todos los productos con paginación
-router.get('/products', async(req, res) => {
+router.get('/products', auth, async(req, res) => {
     try {
         const { limit = 10, page = 1, sort = '', query = '' } = req.query;
         const filter = query ? { title: new RegExp(query, 'i') } : {};
@@ -95,6 +103,21 @@ router.get('/carts/:cid', async(req, res) => {
         res.status(500).send({ status: 'error', error: error.message });
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Configuración de Socket.IO
 export const setupSocketIO = (socketServer) => {

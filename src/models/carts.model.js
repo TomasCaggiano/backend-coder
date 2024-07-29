@@ -1,5 +1,7 @@
 import { Schema, model } from "mongoose";
 
+const carts = 'carts'
+
 const cartsSchema = new Schema({
     products: [{
         product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
@@ -7,4 +9,4 @@ const cartsSchema = new Schema({
     }]
 });
 
-export const cartsModel = model('carts', cartsSchema);
+export const cartsModel = model(carts, cartsSchema);

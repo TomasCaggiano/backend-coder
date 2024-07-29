@@ -9,7 +9,17 @@ import { Server } from 'socket.io';
 import productsRouterDB from './routes/products.routerDB.js'
 import CartsRouterDB from './routes/cart.routerDB.js'
 import mongoose from 'mongoose';
-import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access';
+import cookieParser from 'cookie-parser';
+import pruebasRouter from './routes/pruebas.router.js'
+import session from 'express-session';
+import { sessionsRouter } from './routes/sessions.router.js';
+//import session persistencia en archivo
+import FileStore from 'session-file-store';
+//import session persistencia en mongo
+import MongoStore from 'connect-mongo';
+
+
+
 
 
 const app = express();
@@ -23,8 +33,13 @@ const httpServer = app.listen(PORT, () => {
 //coneccion mongo    localhost=127.0.0.1
 //mongoose.connect('mongodb://127.0.0.1:27017/backcoder')
 
+//nube
 mongoose.connect('mongodb+srv://tomas:nagualpete777@cluster0.qmf3jac.mongodb.net/ecommerce?retryWrites=true&w=majority')
 console.log('base de datos conectada')
+
+//local
+//mongoose.connect('mongodb://127.0.0.1:27017/ecommerce')
+//console.log('base de datos conectada')
 
 
 // Initialize Socket.IO
@@ -41,6 +56,46 @@ app.use(socketMiddleware(socketServer));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+
+app.use(cookieParser('s3cre3toFirma'))
+
+
+//app.use(session({
+//secret: 's3cre3tCoder',
+//    resave: true,
+//    saveUninitialized: true
+//}))
+
+//file store session
+//const fileStorage = FileStore(session)
+//app.use(session({
+//    store: new fileStorage({
+//        path: './sessions',
+//        ttl: 100,
+//        retries: 0
+//    }),
+//    secret: 's3cre3tCoder',
+//    resave: true,
+//    saveUninitialized: true
+//}))
+
+//sesion con mongo
+
+app.use(session({
+    store: MongoStore.create({
+        mongoUrl: 'mongodb://127.0.0.1:27017/ecommerce',
+        ttl: 60 * 60 * 100 * 24
+    }),
+    secret: 's3cre3tCoder',
+    resave: true,
+    saveUninitialized: true
+}))
+
+
+
+
+
+
 
 
 app.engine('hbs', handlebars.engine({
@@ -64,6 +119,8 @@ app.use('/api/productsDB', productsRouterDB);
 app.use('/api/carts', cartRouter);
 app.use('/api/cartsDB', CartsRouterDB);
 app.use('/api/users', usersRouter);
+app.use('/pruebas', pruebasRouter);
+app.use('/api/sessions', sessionsRouter)
 
 // Handle file upload
 app.use('/subir-archivo', uploader.single('file'), (req, res) => {
@@ -87,3 +144,10 @@ setupSocketIO(socketServer);
 
 
 //mongodb+srv://tomas:<password>@cluster0.qmf3jac.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+
+
+
+
+
+
+//path - ttl -- retires

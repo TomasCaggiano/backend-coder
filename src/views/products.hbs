@@ -1,3 +1,5 @@
+<main>
+<a href="/api/sessions/logut" clas="btn btn-otuline-waning"> </a>
 <h1>Products</h1>
     <div class="product-list">
         {{#each products}}
@@ -5,7 +7,6 @@
                 <img src={{this.thumbnail}} alt="">
                 <h2>{{this.title}}</h2>
                 <p>Price: ${{this.price}}</p>
-                <button onclick="window.location.href='/products/{{this._id}}'">View Details</button>
                 <button onclick="addToCart('{{this._id}}')">Add to Cart</button>
             </div>
         {{/each}}
@@ -23,3 +24,4 @@
             <a href="?page={{add currentPage 1}}&limit=10">Next</a>
         {{/if}}
     </div>
+</main>
