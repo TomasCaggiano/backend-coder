@@ -1,7 +1,10 @@
-export function auth(req, res, next) {
+function auth(req, res, next) {
     if (req.session?.user?.admin) {
-        return next()
+        return next();
     }
-
-    return res.status(401).send('not authorized')
+    return res.status(401).send('not authorized');
 }
+
+export const middlewares = {
+    auth
+};

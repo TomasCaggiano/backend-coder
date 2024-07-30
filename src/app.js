@@ -17,7 +17,8 @@ import { sessionsRouter } from './routes/sessions.router.js';
 import FileStore from 'session-file-store';
 //import session persistencia en mongo
 import MongoStore from 'connect-mongo';
-
+import { Passport } from 'passport';
+import { initializePassport } from './config/passport.config.js';
 
 
 
@@ -92,7 +93,9 @@ app.use(session({
 }))
 
 
-
+initializePassport()
+app.use(Passport.initializePassport())
+app.use(passport.session())
 
 
 

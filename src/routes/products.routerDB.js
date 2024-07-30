@@ -1,12 +1,18 @@
 import { Router } from "express";
-import ProductManagerDB from "../dao/mognoDB/productsManagerDB.js"; // Ajusta la ruta según tu estructura de proyecto
-
+import ProductManagerDB from "../dao/mognoDB/productsManagerDB.js";
 const router = Router();
 const productManager = new ProductManagerDB();
 
 router.get('/', async(req, res) => {
+    const { limit = 10, numPage = 1, sort = '', ...filter } = req.query;
+
     try {
-        const products = await productManager.getProducts();
+        const products = await productManager.getProducts({
+            filter,
+            limit,
+            numPage,
+            sort
+        });
         res.send(products);
     } catch (error) {
         res.status(500).send({ status: 'error', error: error.message });
@@ -39,6 +45,7 @@ router.put('/:pid', async(req, res) => {
         res.send({ status: 'success', payload: result });
     } catch (error) {
         res.status(500).send({ status: 'error', error: error.message });
+
     }
 });
 

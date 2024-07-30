@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { auth } from '../middlewares/auth.middleware.js';
+import { middlewares } from '../middlewares/auth.middleware.js';
 const router = Router()
 
 router.get('/setCookie', (req, res) => {
@@ -23,7 +23,7 @@ router.get('/deleteCookie', (req, res) => {
 
 
 //session
-router.get('/current', auth, (req, res) => {
+router.get('/current', middlewares.auth, (req, res) => {
     res.send('sensitive data')
 
 })

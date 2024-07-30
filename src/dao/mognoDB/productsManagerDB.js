@@ -23,7 +23,7 @@ class ProductManagerDB {
         await cart.save();
     }
 
-    async getProductsPaginated({ filter = {}, limit = 10, page = 1, sort = '' } = {}) {
+    async getProducts({ filter = {}, limit = 10, numPage = 1, sort = '' } = {}) {
         const sortOptions = {};
         if (sort === 'asc') {
             sortOptions.price = 1;
@@ -33,15 +33,12 @@ class ProductManagerDB {
 
         const options = {
             limit: parseInt(limit, 10),
-            skip: (parseInt(page, 10) - 1) * parseInt(limit, 10),
-            sort: sortOptions
+            page: parseInt(numPage, 10),
+            sort: sortOptions,
+            lean: true
         };
 
-        return await this.products.find(filter, null, options);
-    }
-
-    async getProducts() {
-        return await this.products.find({})
+        return await this.products.paginate(filter, options);
     }
 
     async getTotalProductsCount(filter = {}) {
