@@ -1,48 +1,30 @@
-import { Router } from 'express'
-import { userModel } from '../models/users.models.js'
+const { Router } = require('express')
+const { usersModel } = require('../models/users.models.js')
 
 const router = Router()
 
-
 router.get('/', async(req, res) => {
-    const users = await userModel.find({})
-    res.send(users)
+    const users = await usersModel.find({})
+    res.send({ status: 'success', users })
 })
-
 
 router.post('/', async(req, res) => {
-    const { first_name, last_name, email } = req.body
-    if (!email) return res.send({ status: 'error', error: 'faltan campos' })
-
-    const newUser = {
-        first_name,
-        last_name,
-        email
-    }
-
-    const result = await userModel.create(newUser)
-
-    res.status(200).send({ status: 'success', payload: result })
+    const { body } = req
+    const result = await usersModel.create(body)
+    res.send({ status: 'success', data: result })
 })
 
-router.put('/:uid', async(req, res) => {
+router.get('/:uid', async(req, res) => {
     const { uid } = req.params
-    const { first_name, last_name, email } = req.body
-    const userToUpdate = req.body
-
-    if (!email, !first_name, !last_name) return res.send({ status: 'error', error: 'faltan campos' })
-
-
-    const result = await userModel.updateOne({ _id: uid }, { email, first_name, last_name })
-        //const result = await userModel.findByIdAndUpdate({_id: uid}, userToUpdate)
-    res.send({ status: 'success', payload: result })
+    const userFound = await usersModel.findOne({ _id: uid })
+    res.send({ status: 'success', payload: userFound })
+})
+router.put('/:uid', (req, res) => {
+    res.send('update User')
+})
+router.delete('/:uid', (req, res) => {
+    res.send('delete User')
 })
 
 
-router.delete('/:uid', async(req, res) => {
-    const { uid } = req.params
-
-    const result = await userModel.deleteOne({ _id: uid })
-})
-
-export default router;
+module.exports = router

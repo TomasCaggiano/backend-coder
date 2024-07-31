@@ -2,7 +2,7 @@
 
     <h1>login</h1>
 
-    <form action="/api/sessions/login" method="POST" class="form-group w-50">
+    <form class="form-group w-50" id="form" action="/api/sessions/login" method="POST" >
         <label >Email</label>
         <input type="email" name="email" class="form-control">
         <label >Password</label>
@@ -14,3 +14,13 @@
         <a  class='btn btn-dark'href="/api/sessions/github">github</a>
     </div>
 </main>
+
+<script>
+    //const form = document.querySelector('#form')
+    //form.addEventListener('submit', (evt)=>{
+    //    evt.preventDefault()
+    //    
+    //    const result  = fetch('/api/sessions/login').then(res => res.json())
+    //    sessionStorage.setItem('token', result.token)
+    //})
+</script>

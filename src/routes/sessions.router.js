@@ -1,29 +1,31 @@
 import { Router } from "express";
 import UserManagerDB from '../dao/mognoDB/usersManagerDB.js';
-import { createHash, isValidPassword } from '../utils/bcrypt.js'; // Añadir la función validatePassword
+import { createHash, isValidPassword } from '../utils/bcrypt.js';
 import { middlewares } from "../middlewares/auth.middleware.js";
-import { Passport } from "passport";
+import passport from "passport";
 import { generateToken } from "../config/jsonwebtoken.config.js";
+import { passportCall } from "../middlewares/passportcall.js";
+import { authorization } from "../middlewares/authorizationJWT.js";
+import CartsManagerDB from "../dao/mognoDB/cartManagerDB.js";
 
 export const sessionsRouter = Router();
 const userService = new UserManagerDB();
+const cartManager = new CartsManagerDB();
 
-sessionsRouter.get('/github', Passport.authenticate('github', { scope: 'user:email' }), (req, res) => {
+sessionsRouter.get('/github', passport.authenticate('github', { scope: 'user:email' }), (req, res) => {});
 
-})
+sessionsRouter.get('/githubcallback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
+    req.session.user = req.user;
+    res.redirect('/products');
+});
 
-sessionsRouter.get('/githubcallback', Passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
-    req.session.user = req.user
-    res.redirect('/products')
-})
-
-//Registro de usuario
+// Registro de usuario
 sessionsRouter.post('/register', async(req, res) => {
     try {
-        const { First_name, Last_name, email, password } = req.body;
+        const { first_name, last_name, email, password, age } = req.body; // Asegurarse de incluir 'age'
 
         // Validar datos
-        if (!First_name || !Last_name || !email || !password) {
+        if (!first_name || !last_name || !email || !password || !age) { // Validar 'age'
             return res.status(400).send({ status: 'error', error: 'Complete data' });
         }
 
@@ -32,31 +34,38 @@ sessionsRouter.post('/register', async(req, res) => {
         if (userExist) {
             return res.status(400).send({ status: 'error', error: 'User already exists' });
         }
+        const newCart = await cartManager.createCart();
+
         const newUser = {
             first_name,
             last_name,
             email,
-            password: createHash(password)
+            age,
+            password: createHash(password),
+            cart: newCart._id
         };
 
         // Crear nuevo usuario
         const result = await userService.createUser(newUser);
-        //datos que se guardan en el token
-        const token = generateToken({
-            email
-        })
-        console.log(result);
-        res.send({ status: 'success', token })
+
+        // Datos que se guardan en el token
+        const token = generateToken({ email });
+        res.cookie('token', token, {
+            maxAge: 60 * 60 * 1000 * 24,
+            httpOnly: true
+        }).send({ status: 'success' });
     } catch (error) {
         console.error(error);
         res.status(500).send({ status: 'error', error: 'Internal server error' });
     }
 });
 
-
-sessionsRouter.post('/current', authTokenMiddleware, (req, res) => {
-    res.send({ status: 'success', token })
-})
+sessionsRouter.post('/current', passport.authenticate('jwt', { session: false }), authorization('admin'), (req, res) => {
+    if (!req.user) {
+        return res.status(401).send({ status: 'error', message: 'Unauthorized' });
+    }
+    res.send({ status: 'success', user: req.user });
+});
 
 // Inicio de sesión de usuario
 sessionsRouter.post('/login', async(req, res) => {
@@ -75,56 +84,26 @@ sessionsRouter.post('/login', async(req, res) => {
         }
 
         // Validar la contraseña
+        if (!isValidPassword(password, userFound.password)) { // Corregido para comparar correctamente
+            return res.status(401).send({ status: 'error', error: 'Invalid password' });
+        }
 
-        if (!isValidPassword(password, { password: userFound.password })) return res.status(401).send({ status: 'error', error: error })
-
-        // Establecer sesión del usuario
-        //req.session.user = {
-        //    email,
-        //    First_name,
-        //    admin: userFound.role === 'admin'
-        //};
+        // Generar token y establecer cookie
         const token = generateToken({
-            email
-        })
-        res.send({ status: 'success', token });
+            id: userFound._id,
+            email,
+            role: userFound.role
+        });
+
+        res.cookie('token', token, {
+            maxAge: 60 * 60 * 1000 * 24,
+            httpOnly: true
+        }).send({ status: 'success' });
     } catch (error) {
         console.error(error);
         res.status(500).send({ status: 'error', error: 'Internal server error' });
     }
 });
-
-
-
-
-
-//sessionsRouter.post('/register', Passport.authenticate('register', { failureRedirect: '/failregister' }), async(req, res) => {
-//    res.send({ status: 'success', message: 'user registered' })
-//})
-//sessionsRouter.post('/failregister', async(req, res) => {
-//    console.log('fallo el registro')
-//    res.send({ error: 'failed' })
-//})
-//
-//sessionsRouter.post('/login', Passport.authenticate('login', { failureRedirect: '/faillogin' }), async(req, res) => {
-//    if (!req.user) return res.status(400).send({ status: 'error', error: 'credencial invalidas' })
-//    req.session.user = {
-//        first_name: req.user.first_name,
-//        last_name: req.user.last_name,
-//        email: req.user.email
-//
-//    }
-//    res.send({ status: 'success', payload: req.user })
-//})
-//sessionsRouter.post('/faillogin', (req, res) => {
-//    res.send({ error: 'login failed' })
-//})
-
-//sessionsRouter.get('/current', middlewares.auth, (req, res) => {
-//        res.send('datos sensibles')
-//    })
-
-
 
 // Cierre de sesión de usuario
 sessionsRouter.get('/logout', (req, res) => {
@@ -136,3 +115,5 @@ sessionsRouter.get('/logout', (req, res) => {
         res.send('Logged out');
     });
 });
+
+export default sessionsRouter;

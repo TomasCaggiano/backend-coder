@@ -1,20 +1,41 @@
-import { Schema, model } from "mongoose";
+const { Schema, model } = require('mongoose');
 
-const users = 'usuarios'
-
-const userSchema = new Schema({
-    first_name: String,
-    last_name: String,
+const usersSchema = new Schema({
+    first_name: {
+        type: String,
+        required: true
+    },
+    last_name: {
+        type: String,
+        required: true
+    },
     email: {
         type: String,
-        require: true,
         unique: true,
+        required: true
     },
-    password: 'string',
+    age: {
+        type: Number,
+        required: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
     role: {
         type: String,
+        enum: ['user', 'user_premium', 'admin'],
         default: 'user'
+    },
+    cart: {
+        type: Schema.ObjectId,
+        ref: 'Carts',
+        required: true
     }
-})
+});
 
-export const userModel = model(users, userSchema)
+const usersModel = model('users', usersSchema);
+
+module.exports = {
+    usersModel
+};

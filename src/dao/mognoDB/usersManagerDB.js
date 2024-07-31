@@ -1,6 +1,6 @@
 import { userModel } from "../../models/users.models.js"
 
-export class UsersManagerMongo {
+export class UsersManagerDB {
     constructor() {
         this.userModel = userModel;
     }
@@ -11,12 +11,12 @@ export class UsersManagerMongo {
         return users
     }
 
-    async createUser(newUser) {
-        return await this.userModel.create(newUser)
+    async createUser(user) {
+        return await this.userModel.create(user)
     }
 
-    async getUserBy(filter) {
-        return this.userModel.findOne(filter);
+    async getUserById(id) {
+        return this.userModel.findById({ _id: id });
     }
 
     async getUserByEmail(email) {
@@ -25,4 +25,4 @@ export class UsersManagerMongo {
 
 }
 
-export default UsersManagerMongo
+export default UsersManagerDB

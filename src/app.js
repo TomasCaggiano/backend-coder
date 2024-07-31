@@ -60,7 +60,7 @@ app.use(express.static(__dirname + '/public'));
 
 app.use(cookieParser('s3cre3toFirma'))
 
-
+//si no se usa session no tiene razon de ser
 //app.use(session({
 //secret: 's3cre3tCoder',
 //    resave: true,
@@ -95,7 +95,7 @@ app.use(session({
 
 initializePassport()
 app.use(Passport.initializePassport())
-app.use(passport.session())
+    //app.use(passport.session())
 
 
 
