@@ -1,6 +1,28 @@
 import { Router } from 'express'
 import { middlewares } from '../middlewares/auth.middleware.js';
+import { fork } from 'child_process';
 const router = Router()
+
+//function suma() {
+//    let result = 0
+//    for (let i = 0; i < 3e4; i++) {
+//        result += 1
+//    }
+//    return result
+//}
+//router.get('/simple', (req, res) => {
+//    const result = suma()
+//    res.send({ result })
+//})
+
+router.get('/compleja', (req, res) => {
+    const child = fork('./src/routes/operacionCompleja.js')
+    child.send('inicia el calculo')
+    child.on('message', result => {
+        res.send({ result })
+    })
+
+})
 
 router.get('/setCookie', (req, res) => {
     res.cookie('CoderCookie', 'this is a cookie', { maxAge: 10000 }).send('Cookie set');

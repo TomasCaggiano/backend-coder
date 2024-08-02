@@ -1,65 +1,35 @@
-// ProductManagerDB.js
-import { productsModel } from "../../models/products.models.js";
+import { ProductModel } from "../../models/products.models.js";
 import { cartsModel } from "../../models/carts.model.js";
 
 class ProductManagerDB {
     constructor() {
-        this.products = productsModel;
-        this.carts = cartsModel;
+        this.product = ProductModel
     }
 
-    async addProductToCart(cid, pid) {
-        const cart = await this.carts.findById(cid);
-        if (!cart) throw new Error('Cart not found');
+    async get({ limit = 10, page = 1, category = '', sort = 1 }) {
 
-        const productIndex = cart.products.findIndex(product => product.product.toString() === pid);
+        return await this.product.paginate(category.length !== 0 ? { category: category } : {}, { limit, page, lean: true, sort: { price: sort } })
 
-        if (productIndex === -1) {
-            cart.products.push({ product: pid, quantity: 1 });
-        } else {
-            cart.products[productIndex].quantity++;
-        }
-
-        await cart.save();
     }
 
-    async getProducts({ filter = {}, limit = 10, numPage = 1, sort = '' } = {}) {
-        const sortOptions = {};
-        if (sort === 'asc') {
-            sortOptions.price = 1;
-        } else if (sort === 'desc') {
-            sortOptions.price = -1;
-        }
-
-        const options = {
-            limit: parseInt(limit, 10),
-            page: parseInt(numPage, 10),
-            sort: sortOptions,
-            lean: true
-        };
-
-        return await this.products.paginate(filter, options);
+    async getById(pid) {
+        return await this.product.findById(pid).lean()
     }
 
-    async getTotalProductsCount(filter = {}) {
-        return await this.products.countDocuments(filter);
+
+    async create(newProduct) {
+        return await this.product.create(newProduct) // return newProduct
+
     }
 
-    async getProductById(pid) {
-        return await this.products.findById(pid);
+    async update(pid, updateProduct) {
+        return await this.product.findByIdAndUpdate({ _id: pid }, updateProduct, { new: true })
     }
 
-    async createProduct(productData) {
-        return await this.products.create(productData);
+    async remove(pid) {
+        return await this.product.findByIdAndUpdate({ _id: pid }, { isActive: false }, { new: true })
     }
 
-    async updateProduct(pid, productData) {
-        return await this.products.findByIdAndUpdate(pid, productData, { new: true });
-    }
-
-    async deleteProduct(pid) {
-        return await this.products.findByIdAndDelete(pid);
-    }
 }
 
 export default ProductManagerDB;

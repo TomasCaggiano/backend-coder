@@ -20,15 +20,25 @@ import MongoStore from 'connect-mongo';
 import { Passport } from 'passport';
 import { initializePassport } from './config/passport.config.js';
 
+import dotenv from 'dotenv'
+import { objectConfig } from './config/index.js';
+
+import routerApp from './routes/index.js'
+
+import cors from 'cors'
 
 
 
 const app = express();
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
+
+const { port, mongoUrl, jwt_private_key } = objectConfig
+
+dotenv.config()
 
 // Create HTTP server
 const httpServer = app.listen(PORT, () => {
-    console.log(`Listening at port 8080`);
+    console.log(`Listening at port` + PORT);
 });
 
 //coneccion mongo    localhost=127.0.0.1
@@ -41,6 +51,7 @@ console.log('base de datos conectada')
 //local
 //mongoose.connect('mongodb://127.0.0.1:27017/ecommerce')
 //console.log('base de datos conectada')
+
 
 
 // Initialize Socket.IO
@@ -59,6 +70,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
 app.use(cookieParser('s3cre3toFirma'))
+app.use(cors())
 
 //si no se usa session no tiene razon de ser
 //app.use(session({
@@ -114,25 +126,7 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'hbs');
 
 
-
-// Use routers
-app.use('/', viewsRouter);
-app.use('/api/products', productsRouter);
-app.use('/api/productsDB', productsRouterDB);
-app.use('/api/carts', cartRouter);
-app.use('/api/cartsDB', CartsRouterDB);
-app.use('/api/users', usersRouter);
-app.use('/pruebas', pruebasRouter);
-app.use('/api/sessions', sessionsRouter)
-
-// Handle file upload
-app.use('/subir-archivo', uploader.single('file'), (req, res) => {
-    if (!req.file) {
-        return res.send('Upload failed');
-    } else {
-        return res.send('Upload succeeded');
-    }
-});
+app.use(routerApp)
 
 // Error handling middleware
 app.use((error, req, res, next) => {

@@ -1,30 +1,18 @@
-const { Router } = require('express')
-const { usersModel } = require('../models/users.models.js')
+import { Router } from 'express'
+import userController from '../controllers/users.controller.js'
 
 const router = Router()
+const { getUsers, createUser, getUser, updateUser, deleteUser } = new userController()
 
-router.get('/', async(req, res) => {
-    const users = await usersModel.find({})
-    res.send({ status: 'success', users })
-})
+router.get('/', getUsers)
 
-router.post('/', async(req, res) => {
-    const { body } = req
-    const result = await usersModel.create(body)
-    res.send({ status: 'success', data: result })
-})
+router.post('/', createUser)
 
-router.get('/:uid', async(req, res) => {
-    const { uid } = req.params
-    const userFound = await usersModel.findOne({ _id: uid })
-    res.send({ status: 'success', payload: userFound })
-})
-router.put('/:uid', (req, res) => {
-    res.send('update User')
-})
-router.delete('/:uid', (req, res) => {
-    res.send('delete User')
-})
+router.get('/:uid', getUser)
+
+router.put('/:uid', updateUser)
+
+router.delete('/:uid', deleteUser)
 
 
-module.exports = router
+export default router
