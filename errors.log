@@ -1,0 +1,6 @@
+{"level":"warn","message":"Alerta de prueba"}
+warning: Alerta de prueba
+fatal: Alerta de prueba
+error: Alerta de prueba
+error: undefined {"code":"ERR_HTTP_INVALID_STATUS_CODE"}
+error: undefined

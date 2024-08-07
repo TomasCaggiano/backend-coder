@@ -1,59 +1,105 @@
-import ProductManagerDB from "../dao/mognoDB/productsManagerDB.js";
-import { Router } from "express";
-const productManager = new ProductManagerDB();
+const { productService } = require("../services")
 
-const router = Router()
 
-class productsController {
-    constructor() {}
+class Producctlass {
+
     getProducts = async(req, res) => {
-        const { limit = 10, numPage = 1, sort = 1, category = '' } = req.query;
+        const { limit, page, category, sort } = req.query
 
-        try {
-            const products = await productManager.get({ limit, page: numPage, category, sort });
-            res.send(products);
-        } catch (error) {
-            res.status(500).send({ status: 'error', error: error.message });
-        }
-    };
-    createProduct = async(req, res) => {
-        const { title, price, code, stock, thumbnail } = req.body;
-        if (!title || !price || !code || !stock || !thumbnail) {
-            return res.status(400).send({ status: 'error', error: 'Missing fields' });
-        }
+        const { docs, totalPages, hasPrevPage, hasNextPage, prevPage, nextPage } = await productService.getProducts({ limit, page, category, sort })
 
-        try {
-            const newProduct = { title, price, code, stock, thumbnail };
-            const result = await productManager.create(newProduct);
-            res.status(201).send({ status: 'success', payload: result });
-        } catch (error) {
-            res.status(500).send({ status: 'error', error: error.message });
+        if (!docs || docs.length === 0) {
+            return res.status(404).json({
+                msg: 'No existen productos',
+                products: false
+            })
         }
+        res.status(200).json({
+            status: 'success',
+            payload: docs,
+            totalPages,
+            hasPrevPage,
+            hasNextPage,
+            prevPage,
+            nextPage,
+            prevLink: prevPage ? `http://localhost:8080/api/products?page=${prevPage}` : null,
+            nextLink: nextPage ? `http://localhost:8080/api/products?page=${nextPage}` : null,
+            page
+        })
     }
+
+    getProduct = async(req, res) => {
+        const { id } = req.params
+        const product = await productService.getProduct(id)
+        if (!product) {
+            return res.status(404).json({
+                status: 'error',
+                payload: 'No existe producto con ese id'
+            })
+        }
+        res.status(200).json({
+            status: 'success',
+            payload: product
+        })
+    }
+
+    createProducts = async(req, res) => {
+        const newProduct = req.body
+            //validar si vienene todos los campos
+
+        // validar si no existe el producto
+        let respuesta = await productService.createProduct(newProduct)
+            // logger.info(respuesta)
+
+        if (!respuesta) {
+            return res.status(401).json({
+                status: 'error',
+                payload: 'Producto ya existe en la base de datos'
+            })
+        }
+        res.status(201).json({
+            status: 'success',
+            payload: respuesta
+        })
+
+    }
+
     updateProduct = async(req, res) => {
-        const { pid } = req.params;
-        const { title, price, code, stock, thumbnail } = req.body;
+        const updateProduct = req.body
+        const { pid } = req.params
 
-        try {
-            const updatedProduct = { title, price, code, stock, thumbnail };
-            const result = await productManager.update(pid, updatedProduct);
-            if (!result) return res.status(404).send({ status: 'error', error: 'Product not found' });
-            res.send({ status: 'success', payload: result });
-        } catch (error) {
-            res.status(500).send({ status: 'error', error: error.message });
+        const respuesta = await productService.updateProduct(pid, updateProduct)
+
+        if (!respuesta) {
+            return res.status(401).json({
+                status: 'error',
+                payload: 'Producto no existe en la base de datos'
+            })
         }
+
+        res.status(200).json({
+            status: 'success',
+            payload: respuesta
+        })
     }
-    deleteProduct = async(req, res) => {
-        const { pid } = req.params;
 
-        try {
-            const result = await productManager.remove(pid);
-            if (!result) return res.status(404).send({ status: 'error', error: 'Product not found' });
-            res.send({ status: 'success', payload: result });
-        } catch (error) {
-            res.status(500).send({ status: 'error', error: error.message });
+    deleteProduct = async(req, res) => {
+        const { pid } = req.params
+
+        const respuesta = await productService.deleteProduct(pid)
+
+        if (!respuesta) {
+            return res.status(401).json({
+                status: 'error',
+                payload: 'Producto no existe en la base de datos'
+            })
         }
+
+        res.status(200).json({
+            status: 'success',
+            payload: respuesta
+        })
     }
 }
 
-export default productsController
+module.exports = new Producctlass()

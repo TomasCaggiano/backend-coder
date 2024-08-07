@@ -1,0 +1,357 @@
+openapi: 3.0.0
+info:
+  title: E-commerce API
+  version: 1.0.0
+paths:
+  /api/products:
+    get:
+      summary: Obtiene todos los productos
+      tags:
+        - Products
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Número de productos por página
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Número de página
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Categoría de productos
+        - in: query
+          name: sort
+          schema:
+            type: string
+          description: Criterio de ordenamiento
+      responses:
+        "200":
+          description: Lista de productos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  payload:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                  totalPages:
+                    type: integer
+                    example: 10
+                  hasPrevPage:
+                    type: boolean
+                    example: true
+                  hasNextPage:
+                    type: boolean
+                    example: true
+                  prevPage:
+                    type: integer
+                    example: 1
+                  nextPage:
+                    type: integer
+                    example: 3
+                  prevLink:
+                    type: string
+                    example: "http://localhost:8080/api/products?page=1"
+                  nextLink:
+                    type: string
+                    example: "http://localhost:8080/api/products?page=3"
+                  page:
+                    type: integer
+                    example: 2
+        "404":
+          description: No existen productos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: No existen productos
+                  products:
+                    type: boolean
+                    example: false
+        "500":
+          description: Error en el backend
+  /api/products/{id}:
+    get:
+      summary: Obtiene un producto por ID
+      tags:
+        - Products
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID del producto que se solicita
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        "404":
+          description: No existe producto con ese ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  payload:
+                    type: string
+                    example: No existe producto con ese ID
+        "500":
+          description: Error en el backend
+    put:
+      summary: Actualiza un producto por ID
+      tags:
+        - Products
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID del producto a actualizar
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProduct'
+      responses:
+        "200":
+          description: Producto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        "401":
+          description: Producto no existe en la base de datos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  payload:
+                    type: string
+                    example: Producto no existe en la base de datos
+        "500":
+          description: Error en el backend
+    delete:
+      summary: Elimina un producto por ID
+      tags:
+        - Products
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID del producto a eliminar
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Producto eliminado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  payload:
+                    type: object
+                    example: null
+        "401":
+          description: Producto no existe en la base de datos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  payload:
+                    type: string
+                    example: Producto no existe en la base de datos
+        "500":
+          description: Error en el backend
+  /api/products:
+    post:
+      summary: Crea un nuevo producto
+      tags:
+        - Products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProduct'
+      responses:
+        "201":
+          description: El producto fue creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        "401":
+          description: Producto ya existe en la base de datos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  payload:
+                    type: string
+                    example: Producto ya existe en la base de datos
+        "500":
+          description: Error en el backend
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: ID del producto autogenerado por MongoDB
+        title:
+          type: string
+          description: Título del producto
+        code:
+          type: string
+          description: Código del producto
+        category:
+          type: string
+          description: Categoría del producto
+        imageUrl:
+          type: string
+          description: URL de la imagen del producto
+        isActive:
+          type: boolean
+          description: Estado del producto (activo o no)
+          default: true
+        stock:
+          type: number
+          description: Cantidad de productos en stock
+        price:
+          type: number
+          description: Precio del producto
+        description:
+          type: string
+          description: Descripción del producto
+        owner:
+          type: string
+          format: ObjectId
+          description: ID del propietario del producto, referencia a la colección de usuarios
+        atCreate:
+          type: string
+          format: date-time
+          description: Fecha de creación del producto
+          default: new Date()
+      example:
+        _id: "60d21b4667d0d8992e610c85"
+        title: "Banana"
+        code: "BAN123"
+        category: "Frutas"
+        imageUrl: "https://example.com/images/banana.jpg"
+        isActive: true
+        stock: 100
+        price: 1.5
+        description: "Bananas frescas y deliciosas"
+        owner: "60d21b4967d0d8992e610c86"
+        atCreate: "2023-08-07T12:34:56Z"
+    CreateProduct:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Título del producto
+          example: "Banana"
+        code:
+          type: string
+          description: Código del producto
+          example: "BAN123"
+        category:
+          type: string
+          description: Categoría del producto
+          example: "Frutas"
+        imageUrl:
+          type: string
+          description: URL de la imagen del producto
+          example: "https://example.com/images/banana.jpg"
+        isActive:
+          type: boolean
+          description: Estado del producto (activo o no)
+          default: true
+          example: true
+        stock:
+          type: number
+          description: Cantidad de productos en stock
+          example: 100
+        price:
+          type: number
+          description: Precio del producto
+          example: 1.5
+        description:
+          type: string
+          description: Descripción del producto
+          example: "Bananas frescas y deliciosas"
+        owner:
+          type: string
+          format: ObjectId
+          description: ID del propietario del producto, referencia a la colección de usuarios
+          example: "60d21b4967d0d8992e610c86"
+        atCreate:
+          type: string
+          format: date-time
+          description: Fecha de creación del producto
+          default: new Date()
+          example: "2023-08-07T12:34:56Z"
+    UpdateProduct:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Título del producto
+          example: "Banana"
+        code:
+          type: string
+          description: Código del producto
+          example: "BAN123"
+        category:
+          type: string
+          description: Categoría del producto
+          example: "Frutas"
+        imageUrl:
+          type: string
+          description: URL de la imagen del producto
+          example: "https://example.com/images/banana.jpg"
+        isActive:
+          type: boolean
+          description: Estado del producto (activo o no)
+         

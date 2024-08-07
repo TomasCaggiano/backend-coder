@@ -1,26 +1,47 @@
-<main class="container">
-
-    <h1>login</h1>
-
-    <form class="form-group w-50" id="form" action="/api/sessions/login" method="POST" >
-        <label >Email</label>
-        <input type="email" name="email" class="form-control">
-        <label >Password</label>
-        <input type="password" name="password" class="form-control">
-        <button class="btn btn-outline-dark w-100" >send</button>
+<div class="container">
+    <h1>Login</h1>
+    <form class="form-group w-50" id="loginForm">       
+        <label class="form-label">Email</label>
+        <input type="text" name="email" class="form-control">
+        <label class="form-label">Password</label>
+        <input type="text" name="password" class="form-control">
+        <label id="mensaje"></label>
+        <input class="btn btn-outline-dark mt-3 w-100" type="submit">
     </form>
-
-    <div>
-        <a  class='btn btn-dark'href="/api/sessions/github">github</a>
-    </div>
-</main>
-
+    <a class="btn btn-dark mt-3 w-50" href="/api/auth/github" >Entrar con Github</a>
+    <br>
+    <br>
+    <a class="w-50" href="/register" >Go to Register</a>
+</div>
 <script>
-    //const form = document.querySelector('#form')
-    //form.addEventListener('submit', (evt)=>{
-    //    evt.preventDefault()
-    //    
-    //    const result  = fetch('/api/sessions/login').then(res => res.json())
-    //    sessionStorage.setItem('token', result.token)
-    //})
+    const handleSubmit = function (evt){
+        evt.preventDefault()
+        let email = document.querySelector('input[name="email"]').value
+        let password = document.querySelector('input[name="password"]').value
+        //logger.info(email, password)
+        fetch('/session/login',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email ,
+                password 
+            })
+        })
+        .then(resp => resp.json())
+        .then(resp => {
+            //logger.info(resp.cid)
+            if(resp.status === 'success'){
+                localStorage.setItem('cid',resp.cid)
+                localStorage.setItem('token',resp.token)
+                window.location.href = 'http://localhost:8080/'
+            }
+        })
+    }
+
+    document.querySelector('#loginForm').addEventListener('submit', handleSubmit)
+
 </script>
+
+

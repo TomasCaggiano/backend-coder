@@ -1,32 +1,40 @@
-import { Router } from "express";
-import pruebasRouter from './pruebas.router.js'
-import productsRouterDB from './products.routerDB.js'
-import CartsRouterDB from './cart.routerDB.js'
-import viewsRouter, { setupSocketIO } from './views.router.js';
-import usersRouter from './users.routerDB.js'
-import productsRouter from './products.routerFS.js';
-import cartRouter from './cart.routerFS.js';
-import sessionsRouter from "./sessions.router.js";
-import { uploader } from "../multer.js";
+const { Router } = require('express')
+// rutas
+// const usersRouter  = require('./users.router.js')
+const viewsRouter    = require('./views.router.js')
+const usersRouter    = require('./users.router.js')
+const authRouter     = require('./session.router.js')
+const productsRouter = require('./products.router.js')
+const ordersRouter   = require('./orders.router.js')
+const cartsRouter    = require('./cart.router.js')
+const pruebasRouter  = require('./pruebas.router.js')
+const errorHandler   = require('../middleware/error/index.js')
+const CustomError = require('../utils/errors/CustomeError.js')
+
 const router = Router()
 
-// Use routers
-router.use('/', viewsRouter);
-router.use('/api/products', productsRouter);
-router.use('/api/productsDB', productsRouterDB);
-router.use('/api/carts', cartRouter);
-router.use('/api/cartsDB', CartsRouterDB);
-router.use('/api/users', usersRouter);
-router.use('/pruebas', pruebasRouter);
-router.use('/api/sessions', sessionsRouter)
+router.use('/',             viewsRouter.getRouter())
+router.use('/session',      authRouter.getRouter())
+router.use('/api/users',    usersRouter.getRouter())
+router.use('/api/products', productsRouter.getRouter())
+router.use('/api/orders',   ordersRouter.getRouter())
+router.use('/api/carts',    cartsRouter.getRouter())
+// router.use('/users',     userRouter.getRouter())
+router.use('/pruebas',      pruebasRouter)
 
-// Handle file upload
-router.use('/subir-archivo', uploader.single('file'), (req, res) => {
-    if (!req.file) {
-        return res.send('Upload failed');
-    } else {
-        return res.send('Upload succeeded');
-    }
-});
+router.use('*', async (req, res)=>{
+    res.status(404).json({
+        mensaje: 'ruta no encontrada'
+    })
+})
 
-export default router
+router.use(errorHandler)
+
+// router.use((err, req, res, next)=>{
+//     logger.info(err)
+//     res.status(500).send('Todo mal')
+// })
+
+module.exports = {
+    router
+}

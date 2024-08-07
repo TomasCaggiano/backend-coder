@@ -1,0 +1,40 @@
+const { dirname } = require('path')
+const { createTransport } = require('nodemailer')
+const config = require('../config/config.js')
+
+
+
+const transport = createTransport({
+    service: 'gmail',
+    port: 578,
+    auth: {
+        user: config.TEST_MAIL,
+        pass: config.MAIL_PASS
+    }
+})
+
+let user = {
+    nombre: 'Tomas',
+    apellido: 'Caggiano'
+}
+const subject = 'Mail de prueba desde server'
+
+const html = `<div>
+                    <h1>Bienvenido ${user.nombre} - ${user.apellido}</h1>
+                </div>`
+
+const sendMail = async({ subject = '', html = '', attachments }) => {
+    logger.info(subject, html, attachments)
+
+    return await transport.sendMail({
+        from: 'Servicio de Node <defe014@gmail.com>',
+        to: config.TEST_MAIL,
+        subject,
+        html,
+        attachments: attachments ? attachments : []
+    })
+}
+
+module.exports = {
+    sendMail
+}

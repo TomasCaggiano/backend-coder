@@ -1,19 +1,16 @@
-<main class="container">
-
-    <h1>Register</h1>
-
-    <form action="/api/sessions/register" method="POST" class="form-group w-50">
-        <label >Email</label>
-        <input type="email" name="email" class="form-control">
-
-        <label >Nombre</label>
-        <input type="text" name="First_name" class="form-control">
-
-        <label >Apellido</label>
-        <input type="text" name="Last_name" class="form-control">
-
-        <label >Password</label>
-        <input type="password" name="password" class="form-control">
-        <button class="btn btn-outline-dark w-100" >send</button>
+<h1>Registro</h1>
+<div class="container">
+    <form action="/api/auth/register" method="post" class="form-group w-50">
+        <label class="form-label">Nombre</label>
+        <input   class="form-control" name="first_name">
+        <label class="form-label">Apellido</label>
+        <input type="text" class="form-control" name="last_name">
+        <label class="form-label">Email</label>
+        <input type="text" class="form-control" name="email">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" name="password">
+        <input class="btn btn-outline-dark mt-3 w-100" type="submit">
     </form>
-</main>
+    <br>
+    <a class="w-50" href="/login" >Go to Login</a>
+</div>

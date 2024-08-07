@@ -1,0 +1,165 @@
+paths:
+  /api/carts/:
+    get:
+      summary: Obtiene todos los carritos
+      tags:
+        - Carts
+      responses:
+        "200":
+          description: Lista de carritos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cart'
+        "500":
+          description: Error en el backend
+
+  /api/carts/{cid}:
+    get:
+      summary: Obtiene un carrito por ID
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: ID del carrito que se solicita
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Carrito encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        "404":
+          description: Carrito no encontrado
+
+  /api/carts/:
+    post:
+      summary: Crea un nuevo carrito
+      tags:
+        - Carts
+      responses:
+        "201":
+          description: Carrito creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        "500":
+          description: Error en el backend
+
+  /api/carts/{cid}/products:
+    post:
+      summary: Agrega un producto al carrito
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: ID del carrito
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pid:
+                  type: string
+                  example: "60e72c9b77b76c4c5f8b4567"
+                quantity:
+                  type: integer
+                  example: 1
+      responses:
+        "200":
+          description: Producto agregado al carrito
+        "404":
+          description: Carrito no encontrado
+
+  /api/carts/{cid}/products/{pid}:
+    delete:
+      summary: Elimina un producto del carrito
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: ID del carrito
+          schema:
+            type: string
+        - in: path
+          name: pid
+          required: true
+          description: ID del producto
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Producto eliminado del carrito
+        "404":
+          description: Carrito no encontrado
+
+  /api/carts/{cid}:
+    delete:
+      summary: Elimina un carrito
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: ID del carrito
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Carrito eliminado
+        "404":
+          description: Carrito no encontrado
+
+  /api/carts/{cid}/checkout:
+    post:
+      summary: Realiza el checkout del carrito
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: ID del carrito
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Compra completada exitosamente
+        "404":
+          description: Carrito no encontrado
+
+components:
+  schemas:
+    Cart:
+      type: object
+      properties:
+        userEmail:
+          type: string
+          example: "user@example.com"
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              product:
+                type: string
+                example: "60e72c9b77b76c4c5f8b4567"
+              quantity:
+                type: integer
+                example: 2

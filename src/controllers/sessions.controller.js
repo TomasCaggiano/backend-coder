@@ -1,110 +1,193 @@
-import UserManagerDB from '../dao/mognoDB/usersManagerDB.js';
-import CartsManagerDB from "../dao/mognoDB/cartManagerDB.js";
-import { createHash, isValidPassword } from '../utils/bcrypt.js';
-import { generateToken } from "../config/jsonwebtoken.config.js";
+const { userModel } = require("../Dao/mongo/models/user.model")
+const { logger } = require("../middleware/logger")
+const { userService, cartService } = require("../services")
+const { createHash, isValidPassword } = require("../utils/bcryptPass")
+const { generateToken } = require("../utils/jwt")
 
-const userService = new UserManagerDB();
-const cartManager = new CartsManagerDB();
+class AuthController {
 
-class SessionsController {
-    static githubAuth = (req, res) => {
-        passport.authenticate('github', { scope: 'user:email' })(req, res);
-    }
 
-    static githubCallback = (req, res) => {
-        passport.authenticate('github', { failureRedirect: '/login' })(req, res, () => {
-            req.session.user = req.user;
-            res.redirect('/products');
-        });
-    }
-
-    static register = async(req, res) => {
+    registerUser = async(req, res) => { // con basae de datos
         try {
-            const { first_name, last_name, email, password, age } = req.body;
+            const { first_name, last_name, email, password } = req.body
 
-            if (!first_name || !last_name || !email || !password || !age) {
-                return res.status(400).send({ status: 'error', error: 'Complete data' });
-            }
+            // validar los datos recibidos
+            if (!first_name || !last_name || !email || !password) return res.status(400).send({ status: 'error', error: 'Values incomplete' })
 
-            const userExist = await userService.getUserBy({ email });
-            if (userExist) {
-                return res.status(400).send({ status: 'error', error: 'User already exists' });
-            }
+            const exists = await userService.getUser(email)
 
-            const newCart = await cartManager.createCart();
+            if (exists) return res.status(401).send({ status: 'error', message: 'El usuario ya existe' })
+
+            let cart = await cartService.createCart(email)
+                // logger.info(cart)
+            const hashedPassword = createHash(password)
 
             const newUser = {
                 first_name,
                 last_name,
                 email,
-                age,
-                password: createHash(password),
-                cart: newCart._id
-            };
+                cartId: cart._id,
+                password: hashedPassword
+            }
+            let result = await userService.createUser(newUser)
+            if (!result) return res.status(400).send({ status: 'error', message: 'Error al crear el usuario' })
 
-            const result = await userService.createUser(newUser);
-
-            const token = generateToken({ email });
-            res.cookie('token', token, {
-                maxAge: 60 * 60 * 1000 * 24,
-                httpOnly: true
-            }).send({ status: 'success' });
+            // // res.status(200).render('login',{
+            // //     showNav: false
+            // // })
+            res.status(200).send({ result })
         } catch (error) {
-            console.error(error);
-            res.status(500).send({ status: 'error', error: 'Internal server error' });
+            logger.error(error)
         }
     }
 
-    static login = async(req, res) => {
-        try {
-            const { email, password } = req.body;
+    loginUser = async(req, res) => {
+        const { email, password } = req.body
+            // validar los datos recibidos
+        if (!email || !password) return res.status(400).send({ status: 'error', error: 'Values incomplete' })
 
-            if (!email || !password) {
-                return res.status(400).send({ status: 'error', error: 'Complete data' });
-            }
+        const user = await userService.getUser(email)
 
-            const userFound = await userService.getUserBy({ email });
 
-            if (!userFound) {
-                return res.status(401).send({ status: 'error', error: 'Invalid credentials' });
-            }
+        // logger.info(user)
+        if (!user) return res.status(401).send({ status: 'error', error: 'No se encuentra el usuario' })
 
-            if (!isValidPassword(password, userFound.password)) {
-                return res.status(401).send({ status: 'error', error: 'Invalid password' });
-            }
+        if (!user.cartId) {
+            // Si no tiene un carrito, crea uno nuevo
+            let newCart = await cartService.createCart(email)
 
-            const token = generateToken({
-                id: userFound._id,
+            // Asocia el ID del carrito al usuario
+            user.cartId = newCart._id;
+            await user.save();
+        }
+
+        const isValidPass = isValidPassword(user, password)
+
+        if (!isValidPass) return res.status(401).send({ status: 'error', error: 'Usuario o contraseña incorrectos' })
+
+        // generar un token para el usuario
+        const { first_name, last_name, role } = user
+        const token = generateToken({
+            user: {
+                first_name,
+                last_name,
                 email,
-                role: userFound.role
-            });
+                role
+            },
+            expiresIn: '24h'
+        })
 
-            res.cookie('token', token, {
-                maxAge: 60 * 60 * 1000 * 24,
-                httpOnly: true
-            }).send({ status: 'success' });
+        // res.send({
+        //     status:'success', 
+        //     token
+        // })
+        res.cookie('token', token, {
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60 * 24
+        }).send({ status: 'success', token, cid: user.cartId._id })
+    }
+
+    logoutUser = async(req, res) => {
+        try {
+            session.destroy()
+            req.session.destroy(err => {
+                if (err) return res.send({ status: 'Logout error', message: err })
+            })
+            res.status(200).redirect('/api/auth/login')
+
+            res.clearCookie('token')
+            res.status(200).redirect('/login')
         } catch (error) {
-            console.error(error);
-            res.status(500).send({ status: 'error', error: 'Internal server error' });
+            logger.info(error)
         }
     }
 
-    static logout = (req, res) => {
-        req.session.destroy(error => {
-            if (error) {
-                console.error(error);
-                return res.status(500).send({ status: 'error', error: 'Failed to logout' });
-            }
-            res.send('Logged out');
-        });
+    forgotPassword = async(req, res) => {
+        try {
+
+            const { email } = req.body
+
+            // buscar el usuario en la base de datos
+            const { _doc: doc } = await userModel.findOne({ email })
+            const { password, _id, ...user } = doc
+            logger.info(user)
+            if (!user) return res.status(400).send({ status: 'error', message: 'El usuario no existe' })
+
+            // generar un token para el usuario
+            const token = generateToken({ user, expiresIn: '1h' })
+                // logger.info(token)
+                // configurar el mail
+            const subject = 'Restablecer contraseña'
+            const html = `
+                            <p> Hola ${user.first_name}, </p>
+                            <p> Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para continuar:</p>
+                            <a href="${base_url}/api/session/reset-password/${token}">Restablecer contraseña</a>
+                            <p>Este enlace expirará en 1 hora.</p>
+                        `
+
+            // enviar un mail con el link para cambiar la contraseña
+            await sendMail({
+                subject,
+                html
+            })
+
+            res.status(200).send({ status: 'success', message: 'Mail enviado, revise su bandeja de entrada o spam' })
+        } catch (error) {
+            logger.info(error)
+        }
     }
 
-    static current = (req, res) => {
-        if (!req.user) {
-            return res.status(401).send({ status: 'error', message: 'Unauthorized' });
+    resetPasswordToken = async(req, res) => {
+        try {
+            const { token } = req.params
+            res.render('resetPass', { token, showNav: false })
+        } catch (error) {
+            logger.info(error)
         }
-        res.send({ status: 'success', user: req.user });
     }
+
+    resetPassword = async(req, res) => {
+        try {
+
+            const { passwordNew, passwordConfirm, token } = req.body
+
+            // validar las contraseñas recibidas si estan vacias y si son iguales
+            if (!passwordNew || !passwordConfirm || passwordNew !== passwordConfirm) return res.status(400).send({
+                status: 'error',
+                message: 'Las contraseñas no pueden estar vacías y deben coincidir'
+            })
+            if (passwordNew !== passwordConfirm) return res.status(400).send({ status: 'error', message: 'Las contraseñas no coinciden' })
+
+            const decodedUser = jwt.verify(token, jwt_private_key)
+
+
+            if (!decodedUser) return res.status(400).send({ status: 'error', message: 'El token no es válido o ha expirado' })
+
+            // // buscar el usuario en la base de datos
+            const { _doc: userDB } = await userModel.findOne({ email: decodedUser.email })
+
+            if (!userDB) return res.status(400).send({ status: 'error', message: 'El usuario no existe' })
+
+            // verificar si las contraseñas sean iguales no es valida
+            let isValidPass = isValidPassword(userDB, passwordNew)
+
+            if (isValidPass) return res.status(400).send({ status: 'error', message: 'No puedes usar una contraseña anterior.' })
+
+            const result = await userModel.findByIdAndUpdate({ _id: userDB._id }, {
+                password: createHash(passwordNew)
+            })
+
+            if (!result) return res.status(400).send({ status: 'error', message: 'Error al actualizar la contraseña' })
+
+            res.status(200).send({
+                status: 'success',
+                message: 'Contraseña actualizada correctamente'
+            })
+        } catch (error) {
+            logger.info(error)
+        }
+    }
+
 }
 
-export default SessionsController;
+module.exports = new AuthController()
